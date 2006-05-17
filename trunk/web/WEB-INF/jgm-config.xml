@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Java Grid Machine - Repository Servlet configuration file
+ =========================================================
+ This file contains the configuration info needed to create and use
+ the Java Grid Machine Class Repository Servlet. 
+ 
+ The file is divided into two sectios, the first is the info regarding
+ the local repositories, and the second holds the info about neightbour
+ repository servlets who can handle requests that can't 
+ be satisfied with the local repo's. 
+ 
+ Each local repository item contained in the local repository configuration 
+ section ("repositories" tag) contains the FQN of the class implementing the  
+ ve.usb.jgm.repo.Repository interface, and the configuration data needed
+ by that class to initialize itself and be able to satisfy class bytecode
+ requests. The tag "repostory", nested inside the "repositories" tag, 
+ represents a local repository. The attributes for this tag includes the
+ FQN name of the implementation class for that repository, and the priority
+ number, wich indicates the order on wich the requests are fowarded to the
+ repositories. The lower the number, the sooner such repository will handle
+ the request.
+ 
+  
+-->
+
+<jgm-config>
+    
+    <!-- Local Repositories configuration section -->
+    <repositories>
+        <!-- Este es el repositorio en el lab SPD -->
+        <repository 
+            class="ve.usb.jgm.repo.FileSystemRepository"
+            priority="1">
+            <directory location="/home/jdeoliveira/work/jgm/repo/build"/>
+        </repository>
+        
+        <!-- Y este es el repo de mi maquina en casa -->
+        <!--<repository 
+            class="ve.usb.jgm.repo.FileSystemRepository"
+            priority="1">
+            <directory location="c:/java_projects/jgm/testLibrary/build"/>
+        </repository>-->
+    </repositories>
+</jgm-config>

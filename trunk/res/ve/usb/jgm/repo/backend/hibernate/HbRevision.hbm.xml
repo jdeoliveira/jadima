@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+          "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="ve.usb.jgm.repo.backend.hibernate">
+
+        <class  name="HbRevision" 
+                table="jdm_revision">
+                
+                <!--<id name="id">
+                    <generator class="native"/>
+                </id>-->
+                
+                <composite-id class="HbRevisionId">
+                    <key-property name="library_name"/>
+                    <key-property name="version_major"/>
+                    <key-property name="version_minor"/>
+                    <key-property name="number"/>
+                </composite-id>
+                
+                <many-to-one name="version" not-null="true" update="false" insert="false">
+                    <column name="library_name"/>
+                    <column name="version_major"/>
+                    <column name="version_minor"/>
+                </many-to-one>
+
+                <property   name="number"
+                            type="int"
+                            not-null="true"
+                            update="false" insert="false"/>
+                
+                <set name="bytecode" inverse="true" cascade="all,delete-orphan">
+                    <key>
+                        <column name="library_name"/>
+                        <column name="version_major"/>
+                        <column name="version_minor"/>
+                        <column name="revision_number"/>
+                    </key>
+                    <one-to-many class="HbBytecode"/>
+                </set>
+
+        </class>
+</hibernate-mapping>

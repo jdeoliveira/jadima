@@ -1,0 +1,4 @@
+6188   DEBUG: select hbbackendr0_.id as id, hbbackendr0_.operation as operation6_, hbbackendr0_.roleName as roleName6_ from jdm_backend_allowedroles hbbackendr0_
+6389   DEBUG: select hblibrary0_.name as name, hblibrary0_.name as name0_, hblibrary0_.description as descript2_0_ from jdm_library hblibrary0_ where hblibrary0_.name=?
+32359  DEBUG: insert into jdm_backend_allowedroles (operation, roleName) values (?, ?)
+33074  DEBUG: select hbbackendr0_.id as id, hbbackendr0_.operation as operation6_, hbbackendr0_.roleName as roleName6_ from jdm_backend_allowedroles hbbackendr0_

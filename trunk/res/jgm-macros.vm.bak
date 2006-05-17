@@ -1,0 +1,361 @@
+#macro (isAbstract $something)
+    #if($something.isAbstract()) abstract #end
+#end
+
+#macro (isFinal $something)
+    #if($something.isFinal()) final #end
+#end
+
+#macro (isStatic $something)
+    #if($something.isStatic()) static #end
+#end
+
+#macro (isPublic $something)
+    #if($something.isPublic()) public #end
+#end
+
+#macro (isProtected $something)
+    #if($something.isProtected()) protected #end
+#end
+
+#macro (isPrivate $something)
+    #if($something.isPrivate()) private #end
+#end
+
+#macro (isTransient $something)
+    #if($something.isTransient()) transient #end
+#end
+
+#macro (isVolatile $something)
+    #if($something.isVolatile()) volatile #end
+#end
+
+#macro (isNative $something)
+    #if($something.isNative()) native #end
+#end
+
+#macro (isSynchronized $something)
+    #if($something.isSynchronized()) synchronized #end
+#end
+
+
+#macro (interfaces $theClass)
+    #if(!($util.isNull($theClass.getInterfaces())) && ($util.getArraySize($theClass.getInterfaces()) > 0))
+        implements 
+        #foreach($interface in $theClass.getInterfaces()) 
+            $util.replaceInnerClass("$interface.getClassName()") 
+            #separator($velocityCount $util.getArraySize($theClass.getInterfaces()))
+        #end
+    #end
+#end
+
+
+#macro (separator $index $total)
+    #if($index != $total)
+        , 
+    #end
+#end
+
+#macro (argumentTypes $method $varName)
+    #foreach($argument in $method.getArgumentTypes())
+        
+        #if($primitives.containsKey($argument.toString()))
+            /*Parametro primitivo*/
+            $argument.toString()
+            /*fin parametro primitivo*/
+        
+        #else
+            /*Parametro clase*/
+            $util.replaceInnerClass("$argument")
+            /*fin parametro clase*/
+        #end
+
+        #if(!($varName.equals("")))
+            ${varName}${velocityCount}
+        #end
+
+        #separator($velocityCount $util.getArraySize($method.getArgumentTypes()))
+    #end
+#end
+
+#macro (innerConsArgumentTypes $method $varName $outerClass)
+    #foreach($argument in $method.getArgumentTypes())
+        /* el argumento es $argument.toString() y la outer class es $outerClass.getClassName() */
+        #if(!($argument.toString().equals($outerClass.getClassName())))
+            #if($primitives.containsKey($argument.toString()))
+                /*Parametro primitivo*/
+                $argument.toString()
+                /*fin parametro primitivo*/
+
+            #else
+                /*Parametro clase*/
+                $util.replaceInnerClass("$argument")
+                /*fin parametro clase*/
+            #end
+
+            #if(!($varName.equals("")))
+                ${varName}${velocityCount}
+            #end
+            #separator($velocityCount $util.getArraySize($method.getArgumentTypes()))
+        #end
+        
+    #end
+#end
+
+#macro (throwsClause $method)
+    #if($util.isNull($method.getExceptionTable()))
+        #set($exceptions = $method.getExceptionTable().getExceptionNames())
+	#if($util.getArraySize($exceptions) > 0)
+            throws
+
+            #foreach($exception in $exceptions)
+                $exception
+
+                #separator($velocityCount $util.getArraySize($exceptions) )
+            #end
+	#end
+    #else
+        //No lanza excepciones
+    #end
+#end
+
+#macro (superCall $class)
+    #if(!($util.isNull($class.getSuperClass())))
+        //La superclase es: $class.getSuperClass().getClassName()
+        super(
+        #set($theCons = $util.getConstructor($class).getArgumentTypes())
+        #foreach($argument in $theCons)
+            #if($primitivesNull.containsKey($argument.toString()))
+                $primitivesNull.get($argument.toString())
+            #else
+                ($util.replaceInnerClass("$argument")) null
+            #end
+            #separator($velocityCount $util.getArraySize($theCons))
+        #end
+        );
+    #else 
+        //This has no super class
+    #end
+#end
+
+#macro (innerSuperCall $class $outerClass)
+    #if(!($util.isNull($class.getSuperClass())))
+        //La superclase es: $class.getSuperClass().getClassName()
+        super(
+        #set($theCons = $util.getConstructor($class).getArgumentTypes())
+        #foreach($argument in $theCons)
+            /* aqui deberia buscar la outer class que contiene a la super clase
+            de esta inner class */
+            #if(!($argument.toString().equals($outerClass.getClassName())))
+                #if($primitivesNull.containsKey($argument.toString()))
+                    $primitivesNull.get($argument.toString())
+                #else
+                    ($util.replaceInnerClass("$argument")) null
+                #end
+                #separator($velocityCount $util.getArraySize($theCons))
+            #end
+        #end
+        );
+    #else 
+        //This has no super class
+    #end
+#end
+
+#macro (anonInnerNew $class $outerClass)
+    #if(!($util.isNull($class.getSuperClass())))
+        //La superclase es: $class.getSuperClass().getClassName()
+        new $util.replaceInnerClass($class.getSuperClass().getClassName()) (
+        #set($theCons = $util.getConstructor($class).getArgumentTypes())
+        #foreach($argument in $theCons)
+            /* aqui deberia buscar la outer class que contiene a la super clase
+            de esta inner class */
+            #if(!($argument.toString().equals($outerClass.getClassName())))
+                #if($primitivesNull.containsKey($argument.toString()))
+                    $primitivesNull.get($argument.toString())
+                #else
+                    ($util.replaceInnerClass("$argument")) null
+                #end
+                #separator($velocityCount $util.getArraySize($theCons))
+            #end
+        #end
+        )
+    #else 
+        //This has no super class
+    #end
+#end
+
+#macro (fields $class)
+    #foreach($field in $class.getFields())
+        #if(!($field.isPrivate()))
+            #isPublic($field)
+            #isProtected($field)
+            #isStatic($field)
+            #isFinal($field)
+            #isTransient($field)
+            #isVolatile($field)
+
+            #if($primitives.containsKey($field.getType().toString()))
+                #set($isPrimitive = true)
+                /*Parametro primitivo*/
+                $field.getType().toString()
+                /*fin parametro primitivo*/
+            #else
+                #set($isPrimitive = false)
+                /*Parametro clase*/
+                $util.replaceInnerClass("$field.getType().toString()")
+                /*fin parametro clase*/
+            #end
+
+            ${field.getName()}#if(!($field.isFinal()));#end
+            
+            #if($field.isFinal())
+                = 
+                #if($isPrimitive)
+                    $primitivesNull.get($field.getType().toString()) ;
+                #else
+                    null;
+                #end
+            #end
+            
+        #end
+    #end
+#end
+
+#macro (extends $theClass)
+    #if(!($util.isNull($theClass.getSuperClass()))) 
+        #if(!($theClass.getSuperClass().getClassName() == "java.lang.Object"))
+            extends $util.replaceInnerClass($theClass.getSuperClass().getClassName()) 
+        #end
+    #end
+#end
+
+#macro (extendsInterface $theClass)
+    #if(!($util.isNull($theClass.getInterfaces())) && ($util.getArraySize($theClass.getInterfaces()) > 0))
+        extends 
+        #foreach($interface in $theClass.getInterfaces()) 
+            $util.replaceInnerClass("$interface.getClassName()") 
+            #separator($velocityCount $util.getArraySize($theClass.getInterfaces()))
+        #end
+    #end
+#end
+
+#macro (methodSignature $method)
+    #if($primitives.containsKey($method.getReturnType().toString()))
+        #set($returnsPrimitive = true)
+        #set($returnWrapper = $primitives.get($method.getReturnType().toString()))
+        //Retorna tipo primitivo...
+    #else
+        #set($returnsPrimitive = false)
+    #end
+
+    #isPublic($method)
+    #isPrivate($method)
+    #isProtected($method)
+
+    #isStatic($method) 
+    #isAbstract($method)
+    #isFinal($method) 
+    #isNative($method) 
+    #isSynchronized($method) 
+
+    #if($util.isConstructor($method))
+        $className
+    #else
+        $util.replaceInnerClass("$method.getReturnType()") $method.getName()
+    #end
+
+    ( #argumentTypes($method "_jgm_arg") )
+
+    #throwsClause($method)
+#end
+
+#macro (innerMethodSignature $method)
+    #if($primitives.containsKey($method.getReturnType().toString()))
+        #set($returnsPrimitive = true)
+        #set($returnWrapper = $primitives.get($method.getReturnType().toString()))
+        //Retorna tipo primitivo...
+    #else
+        #set($returnsPrimitive = false)
+    #end
+
+    #isPublic($method)
+    #isPrivate($method)
+    #isProtected($method)
+
+    #isStatic($method) 
+    #isAbstract($method)
+    #isFinal($method) 
+    #isNative($method) 
+    #isSynchronized($method) 
+
+    #if($util.isConstructor($method))
+        $util.extractClassName($innerClass)
+    #else
+        $util.replaceInnerClass("$method.getReturnType()") $method.getName()
+    #end
+
+    ( #argumentTypes($method "_jgm_arg") )
+
+    #throwsClause($method)
+#end
+
+#macro (innerConsSignature $method $outerClass)
+    #if($primitives.containsKey($method.getReturnType().toString()))
+        #set($returnsPrimitive = true)
+        #set($returnWrapper = $primitives.get($method.getReturnType().toString()))
+        //Retorna tipo primitivo...
+    #else
+        #set($returnsPrimitive = false)
+    #end
+
+    #isPublic($method)
+    #isPrivate($method)
+    #isProtected($method)
+
+    #isStatic($method) 
+    #isAbstract($method)
+    #isFinal($method) 
+    #isNative($method) 
+    #isSynchronized($method) 
+
+    #if($util.isConstructor($method))
+        $util.extractClassName($innerClass)
+    #else
+        $util.replaceInnerClass("$method.getReturnType()") $method.getName()
+    #end
+
+    ( #innerConsArgumentTypes($method "_jgm_arg" $outerClass) )
+
+    #throwsClause($method)
+#end
+
+
+#macro (anonInnerMethodSignature $method)
+    #if($primitives.containsKey($method.getReturnType().toString()))
+        #set($returnsPrimitive = true)
+        #set($returnWrapper = $primitives.get($method.getReturnType().toString()))
+        //Retorna tipo primitivo...
+    #else
+        #set($returnsPrimitive = false)
+    #end
+
+    #isPublic($method)
+    #isPrivate($method)
+    #isProtected($method)
+
+    #isStatic($method) 
+    #isAbstract($method)
+    #isFinal($method) 
+    #isNative($method) 
+    #isSynchronized($method) 
+
+    #if($util.isConstructor($method))
+        $util.extractClassName($anonInnerClass.getSuperClass())
+    #else
+        $util.replaceInnerClass("$method.getReturnType()") $method.getName()
+    #end
+
+    ( #argumentTypes($method "_jgm_arg") )
+
+    #throwsClause($method)
+#end

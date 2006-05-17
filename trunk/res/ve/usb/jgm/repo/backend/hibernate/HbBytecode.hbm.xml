@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+          "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="ve.usb.jgm.repo.backend.hibernate">
+
+        <class  name="HbBytecode" 
+                table="jdm_bytecode">
+                
+                <!--<id name="id">
+                    <generator class="native"/>
+                </id>-->
+
+                <composite-id name="id" class="HbBytecodeId">
+                    <key-property name="library_name"/>
+                    <key-property name="version_major"/>
+                    <key-property name="version_minor"/>
+                    <key-property name="revision_number"/>
+                    <key-property name="className"/>
+                </composite-id>                
+
+                <many-to-one name="revision" not-null="true" update="false" insert="false">
+                    <column name="library_name"/>
+                    <column name="version_major"/>
+                    <column name="version_minor"/>
+                    <column name="revision_number"/>
+                </many-to-one>
+
+                <property   name="className"
+                            type="string"
+                            not-null="true"
+                            update="false" insert="false">
+                    <column name="className"/>
+                </property>
+                    
+                            
+                <property   name="classData"
+                            type="binary"
+                            not-null="true">
+                    <column name="classData" length="524288"/>
+                </property>
+        </class>
+</hibernate-mapping>

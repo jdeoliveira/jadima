@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<!-- Log4J Logging configuration section -->
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+  <appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d [%t] %p - %m%n"/>
+    </layout>
+  </appender>
+
+  <appender name="RollingAppender" class="org.apache.log4j.RollingFileAppender">
+    <param name="File" value="/tmp/client.log"/>
+    <param name="maxBackupIndex" value="10"/>
+    <param name="maxFileSize" value="500KB"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <!-- <param name="ConversionPattern" value="%d [%t] %p - %m%n"/> -->
+      <param name="ConversionPattern" value="%-5p %-6r %-10t [%.26025F:%5L] %m\n"/>
+    </layout>
+  </appender>
+
+  
+  <logger name="ve.usb.jgm.client.JgmClassLoader">
+    <level value="debug" />
+    <appender-ref ref="RollingAppender"/>
+  </logger>
+  
+  <logger name="org.apache.axis.i18n.ProjectResourceBundle">
+    <level value="none" />
+  </logger>
+  
+</log4j:configuration> 
+    
