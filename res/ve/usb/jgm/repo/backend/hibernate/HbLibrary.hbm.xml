@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+          "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="ve.usb.jgm.repo.backend.hibernate">
+
+        <class  name="HbLibrary" 
+                table="jdm_library">
+                
+                <!--
+                <id name="id">
+                    <generator class="native"/>
+                </id>
+                -->
+                
+                <id name="name">
+                    <generator class="assigned"/>
+                </id>   
+                
+                <property   name="name"
+                            type="string"
+                            not-null="true"
+                            unique="true"
+                            update="false" insert="false">
+                    <column name="name"/>
+                </property>
+
+                <property   name="description"
+                            type="string"
+                            not-null="true"/>
+
+                <set name="allowedRoles" 
+                     table="jdm_library_allowedroles">
+                    <key> 
+                        <column name="library_name"/>
+                    </key>
+                    <element type="string" column="roleName"/>
+                </set>
+
+                <set name="versions" inverse="true"  cascade="all,delete-orphan">
+                    <key>
+                        <column name="library_name"/>
+                    </key>
+                    <one-to-many class="HbVersion"/>
+                </set>
+        </class>
+</hibernate-mapping>

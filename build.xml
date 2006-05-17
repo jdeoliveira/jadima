@@ -1,0 +1,325 @@
+<project name="jgm" basedir="." default="build">
+
+    <!--
+        Las siguientes propiedades vienen del archivo properties en el home:
+        * axis.home             -> Ubicacion de la instalacion de axis
+        * axis.instance.home    -> Instalacion de axis en el servlet container
+        * catalina.home         -> Ubicacion de tomcat
+        * axis.admin.path       -> Path al AdminServlet de la instalacion de axis
+    -->
+    <property file="${user.home}/.jgm.build.properties" />
+    
+    <property name="src" location="${basedir}/src" />
+    <property name="conf" location="${basedir}/conf" />
+    <property name="scripts" location="${basedir}/scripts" />
+    <property name="res" location="${basedir}/res" />
+    <property name="web" location="${basedir}/web" />
+    <property name="lib" location="${basedir}/lib" />
+    <property name="dist" location="${basedir}/dist" />
+    <property name="dist.repo" location="${dist}/repo" />
+    <property name="dist.client" location="${dist}/client" />
+    <property name="build" location="${basedir}/build" />
+    <property name="gen" location="${basedir}/gen" />
+
+    <path id="axis.classpath">
+        <fileset dir="${axis.home}/lib">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <taskdef resource="axis-tasks.properties"
+             classpathref="axis.classpath" />
+                        
+    <path id="compile.class.path">
+        <fileset dir="${catalina.home}/common/lib" includes="*.jar"/>
+        <fileset dir="${lib}" includes="*.jar"/>
+    </path>
+    
+    <path id="repo.class.path">
+        <fileset dir="${catalina.home}/common/lib" includes="*.jar"/>
+        <pathelement path="${build}"/>
+    </path>
+
+    
+    <!-- 
+    BUILD
+    
+    Compila los componentes principales (core) de JaDiMa
+    -->
+    <target name="build" description="Compile the JGM core components">
+            <echo message="Building Jgm core components"/>
+            <mkdir dir="${build}"/>
+            <javac  srcdir="${src}"
+                    sourcepath=""
+                    destdir="${build}"
+                    debug="true"
+                    optimize="true"
+                    deprecation="true">
+                    <classpath>
+                        <path refid="compile.class.path"/>
+                        <path refid="axis.classpath"/>
+                    </classpath> 
+                    <compilerarg value="-Xlint:none"/>
+                    <!-- lo de web service no se compila aqui -->
+                    <exclude name="**/ws/**/*.java"/>
+                    <include name="**/*.java"/>
+            </javac>
+            <copy toDir="${build}">
+                <fileset    dir="${res}" 
+                            includes="**/**.*"/>
+            </copy>
+    </target>
+    
+    <!-- 
+    BUILD-WS-REPO
+    
+    Compila el modulo de comunicacion del lado del servidor de tipo SOAP
+    -->
+    <target name="build-ws-repo" depends="build">
+            <javac  srcdir="${src}" 
+                    destdir="${build}"
+                    debug="true"
+                    optimize="true"
+                    deprecation="true">
+                    <classpath>
+                        <path refid="compile.class.path"/>
+                        <path refid="axis.classpath"/>
+                    </classpath> 
+                    <compilerarg value="-Xlint:none"/>
+                    <include name="**/ws/repo/*.java"/>
+                    <include name="**/ws/faults/*.java"/>
+            </javac>
+    </target>
+
+    <!-- 
+    CLEAN
+    
+    Elimina todos los productos de construccion
+    -->
+    <target name="clean" 
+            description="Clean environment">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+        <delete dir="${gen}"/>
+    </target>
+
+    <!-- t
+    DIST-SERVICE
+    
+    Produce el deliverable del modulo de comunicacion del lado del servidor
+    de tipo SOAP
+    -->
+    <target name="distService" 
+            depends="build-ws">
+        <mkdir dir="${dist.repo}"/>
+        <jar 
+            destfile="${dist.repo}/jgmRepo.jar">
+            <fileset dir="${build}" 
+                     includes="ve/usb/jgm/repo/**/**.class, ve/usb/jgm/ws/**.class, ve/usb/jgm/ws/faults/**.class, ve/usb/jgm/ws/repo/**.class, ve/usb/jgm/util/**.class, **/*.hbm.xml"/>
+        </jar>
+    </target>
+
+    <!-- 
+    DEPLOY-SERVICE
+    
+    Instala el modulo de comunicacion del lado del servidor de tipo SOAP, en la
+    instalacion de axis dada por la propiedad ${axis.instance.home}. El servlet
+    container debe estar levantado para poder ejecutar el registro del componente
+    -->
+    <target name="deployService" 
+            depends="distService"
+            description="Deploy the JGM Web Service on the axis engine">
+            <copy toDir="${axis.instance.home}/WEB-INF/lib" file="${dist.repo}/jgmRepo.jar"/>
+            <copy toDir="${axis.instance.home}/WEB-INF/lib">
+                <fileset dir="${lib}">
+                    <include name="**/*.jar" />
+                </fileset>
+            </copy>
+            <axis-admin
+                port="80"
+                hostname="localhost"
+                failonerror="true"
+                debug="true"
+                xmlfile="${gen}/ve/usb/jgm/ws/deploy.wsdd"
+            />
+    </target>
+
+    <!-- 
+    DIST-CLIENT
+    
+    Crea la distribucion de cliente (core) de JaDiMa
+    -->
+    <target name="distClient"
+            description="Create the client component distribution directory"
+            depends="build-ws-client">
+            <mkdir dir="${dist.client}"/>
+            <mkdir dir="${dist.client}/lib"/>
+            <mkdir dir="${dist.client}/plugins"/>
+            <mkdir dir="${dist.client}/bin"/>
+            <mkdir dir="${dist.client}/conf"/>
+            <mkdir dir="${dist.client}/docs"/>
+            
+            <jar destfile="${dist.client}/lib/jgm-client.jar">
+                <fileset dir="${build}" includes="ve/usb/jgm/client/**/**.class"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/client/**/**.*"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/util/**/**.class"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/tools/**/**.class"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/repo/**.class"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/ws/client/**.class"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/ws/**.class"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/ws/faults/**.class"/>
+                <fileset dir="${build}" includes="org/**/**.class"/>
+                <fileset dir="${res}" includes="*.vm"/>
+            </jar>
+            
+            <copy toDir="${dist.client}/lib">
+                <fileset dir="${lib}" includes="*.jar"/>
+            </copy>
+            <copy toDir="${dist.client}/bin">
+                <fileset dir="${scripts}"/>
+            </copy>
+            <!--<copy toDir="${dist.client}/conf">
+                <fileset dir="${conf}/client" includes="*"/>
+            </copy>-->
+
+            <fixcrlf srcdir="${dist.client}/bin" eol="lf" eof="remove" includes="**/*"/>
+            <fixcrlf srcdir="${dist.client}/bin" eol="crlf" includes="**/*.bat"/>
+                        
+            <chmod perm="a+rx">
+                <fileset dir="${dist.client}/bin"/>
+            </chmod>
+    </target>
+
+    <!-- 
+    CHECK-WSDL
+    
+    Verifica si la clase ve.usb.jgm.ws.repo.RepositoryService esta al dia
+    con respecto al WSDL generado
+    -->
+    <target name="check-wsdl">
+        <uptodate 
+            srcfile="${src}/ve/usb/jgm/ws/repo/RepositoryService.java"
+            targetfile="${gen}/jgm.wsdl"
+            property="wsdl.uptodate"
+            value="true"/>
+    </target>
+    
+    <!-- 
+    GENERATE-WSDL
+    
+    Genera un WSDL a partir de la clase ve.usb.jgm.ws.repo.RepositoryService.
+    Solo se ejecuta si el WSDL generado no existe o no esta al dia con respecto
+    al fuente de la clase.
+    -->
+    <target name="generate-wsdl" depends="build, build-ws-repo, check-wsdl">
+        <mkdir dir="${gen}"/>
+        <delete file="${gen}/jgm.wsdl"/>
+
+        <axis-java2wsdl
+            classname="ve.usb.jgm.ws.repo.RepositoryService"
+            style="rpc"
+            namespace="JgmRepositoryService"
+            location="http://localhost/axis/services/JgmService"
+            output="${gen}/jgm.wsdl"
+            implclass="ve.usb.jgm.ws.repo.RepositoryService"
+            >
+
+            <classpath refid="repo.class.path"/>
+
+        </axis-java2wsdl> 
+
+    </target>
+
+    <!-- 
+    CHECK-WSDD
+    
+    Verifica si el WSDD y las clases helper del servicio de repositorio estan
+    al dia con respecto al WSDL generado
+    -->
+    <target name="check-wsdd">
+        <uptodate 
+            srcfile="${gen}/jgm.wsdl"
+            property="wsdd.uptodate"
+            value="true">
+            <mapper type="glob" from="**/*.*" to="${gen}/ve.usb.ve/jgm/**/*.*"/>
+        </uptodate>
+    </target>
+    
+    <!-- 
+    GENERATE-WSDD
+    
+    Genera clases helper y el WSDD a partir del WSDL del servicio del repositorio.
+    Solo se ejecuta si las clases helper o el WSDD no existen o no estan al dia
+    con respecto al WSDL.
+    -->
+    <target name="generate-wsdd" depends="build, generate-wsdl, check-wsdd">
+        <mkdir dir="${gen}"/>
+
+        <axis-wsdl2java
+            output="${gen}"
+            verbose="true"
+            url="${gen}/jgm.wsdl" 
+            debug="false"
+            serverside="true"
+            deployscope="application">
+
+            <mapping 
+                    namespace="JgmRepositoryService" 
+                    package="ve.usb.jgm.ws"/>
+                    
+        </axis-wsdl2java>
+        
+        <echo message="Applying classname substitution..."/>
+        <replaceregexp 
+            file="${gen}/ve/usb/jgm/ws/deploy.wsdd"
+            match="ve.usb.jgm.ws.JgmServiceSoapBindingImpl"
+            replace="ve.usb.jgm.ws.repo.RepositoryService"/> 
+    </target>
+
+    <!-- 
+    BUILD-WS
+    
+    Compila las helper classes generadas por el WSDL
+    -->
+    <target name="build-ws" depends="build, generate-wsdd">
+            <javac  srcdir="${gen}" 
+                    sourcepath=""
+                    destdir="${build}"
+                    debug="true"
+                    optimize="true"
+                    deprecation="true">
+                    <classpath>
+                        <path refid="compile.class.path"/>
+                        <path refid="axis.classpath"/>
+                    </classpath> 
+                    <compilerarg value="-Xlint:none"/>
+                    <exclude name="**/repo/**/*.java"/>
+                    <exclude name="**/ws/faults/**/*.java"/>
+            </javac>
+    </target>
+        
+    <!-- 
+    BUILD-WS-CLIENT
+    
+    Compila el modulo de comunicacion del lado del cliente de tipo SOAP
+    -->
+    <target name="build-ws-client" depends="build-ws">            
+            <!-- ahora si compilamos nuestros clientes ws -->
+            <javac  srcdir="${src}" 
+                    destdir="${build}"
+                    debug="true"
+                    optimize="true"
+                    deprecation="true">
+                    <classpath>
+                        <path refid="compile.class.path"/>
+                        <path refid="axis.classpath"/>
+                        <pathelement path="${build}"/>
+                    </classpath> 
+                    <compilerarg value="-Xlint:none"/>
+                    <include name="**/ws/client/**/*.java"/>
+            </javac>
+    </target>
+
+
+        
+</project>

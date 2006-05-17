@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.ant.freeform</type>
+    <configuration>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
+            <name>jgm core components</name>
+            <folders>
+                <source-folder>
+                    <label>src</label>
+                    <type>java</type>
+                    <location>src</location>
+                </source-folder>
+                <source-folder>
+                    <label>web</label>
+                    <type>java</type>
+                    <location>web</location>
+                </source-folder>
+                <source-folder>
+                    <label>res</label>
+                    <type>java</type>
+                    <location>res</location>
+                </source-folder>
+                <source-folder>
+                    <label>scripts</label>
+                    <type>java</type>
+                    <location>scripts</location>
+                </source-folder>
+                <source-folder>
+                    <label>conf</label>
+                    <type>java</type>
+                    <location>conf</location>
+                </source-folder>
+                <source-folder>
+                    <label>gen</label>
+                    <type>java</type>
+                    <location>gen</location>
+                </source-folder>
+            </folders>
+            <ide-actions>
+                <action name="build">
+                    <target>build</target>
+                </action>
+                <action name="rebuild">
+                    <target>clean</target>
+                    <target>build</target>
+                </action>
+                <action name="clean">
+                    <target>clean</target>
+                </action>
+                <action name="test">
+                    <target>deploy_repo</target>
+                </action>
+            </ide-actions>
+            <view>
+                <items>
+                    <source-folder style="packages">
+                        <label>src</label>
+                        <location>src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>web</label>
+                        <location>web</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>res</label>
+                        <location>res</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>scripts</label>
+                        <location>scripts</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>conf</label>
+                        <location>conf</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>gen</label>
+                        <location>gen</location>
+                    </source-folder>
+                    <source-file>
+                        <location>build.xml</location>
+                    </source-file>
+                </items>
+                <context-menu>
+                    <ide-action name="build"/>
+                    <ide-action name="rebuild"/>
+                    <ide-action name="clean"/>
+                    <ide-action name="test"/>
+                </context-menu>
+            </view>
+        </general-data>
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
+            <compilation-unit>
+                <package-root>src</package-root>
+                <classpath mode="compile">jakarta-tomcat-5.0.16/common/lib/servlet-api.jar;dist/client/lib/jgm-client.jar;build;lib/activation.jar;lib/addressing-1.0.jar;lib/ant.jar;lib/antlr-2.7.5H3.jar;lib/axis-ant.jar;lib/axis.jar;lib/bcel-5.1.jar;lib/c3p0-0.8.5.2.jar;lib/cglib-2.1.jar;lib/commons-cli-1.0.jar;lib/commons-codec-1.2.jar;lib/commons-codec-1.3.jar;lib/commons-collections-2.1.1.jar;lib/commons-discovery.jar;lib/commons-httpclient-2.0.jar;lib/commons-httpclient-3.0-alpha1.jar;lib/commons-logging-1.0.4.jar;lib/commons-logging.jar;lib/dom4j-1.6.jar;lib/ehcache-1.1.jar;lib/hibernate3.jar;lib/jalopy-1.0b11.jar;lib/jaxrpc.jar;lib/jce-jdk13-125.jar;lib/jdom.jar;lib/junit-3.8.1.jar;lib/log4j-1.2.8.jar;lib/mail.jar;lib/opensaml.jar;lib/saaj.jar;lib/velocity-1.4.jar;lib/velocity-dep-1.4.jar;lib/wsdl4j.jar;lib/wss4j.jar;lib/xalan.jar;lib/xmllight.jar;lib/xmlsec.jar</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>web</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>res</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>scripts</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>conf</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>gen</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+        </java-data>
+    </configuration>
+</project>

@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+          "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="ve.usb.jgm.repo.backend.hibernate">
+
+        <class  name="HbVersion" 
+                table="jdm_version">
+                
+                <!--<id name="id">
+                    <generator class="native"/>
+                </id>-->
+                
+                <composite-id name="id" class="HbVersionId">
+                    <key-property name="library_name"/>
+                    <key-property name="major"/>
+                    <key-property name="minor"/>
+                </composite-id>
+                
+                <many-to-one name="library" update="false" insert="false">
+                    <column name="library_name" not-null="true"/>
+                </many-to-one>
+
+                <property   name="major"
+                            type="int"
+                            not-null="true"
+                            update="false" insert="false"/>
+
+                <property   name="minor"
+                            type="int"
+                            not-null="true"
+                            update="false" insert="false"/>
+                
+                <property   name="description"
+                            type="string"
+                            not-null="true"/>
+
+                <property   name="stubsJar"
+                            type="binary"
+                            not-null="true">
+                    <column name="stubsJar" length="5242880"/>
+                </property>
+                            
+                <property   name="javadocZip"
+                            type="binary"
+                            not-null="true">
+                    <column name="javadocZip" length="5242880"/>
+                </property>
+
+                <set name="allowedRoles" 
+                     table="jdm_version_allowedroles">
+                    <key>
+                        <column name="library_name"/>
+                        <column name="major"/>
+                        <column name="minor"/>
+                    </key>
+                    <element type="string" column="roleName"/>
+                </set>
+                
+                <set name="revisions" inverse="true" cascade="all,delete-orphan">
+                    <key>
+                        <column name="library_name"/>
+                        <column name="version_major"/>
+                        <column name="version_minor"/>
+                    </key>
+                    <one-to-many class="HbRevision"/>
+                </set>
+
+        </class>
+</hibernate-mapping>
