@@ -115,7 +115,18 @@
         <jar 
             destfile="${dist.repo}/jgmRepo.jar">
             <fileset dir="${build}" 
-                     includes="ve/usb/jgm/repo/**/**.class, ve/usb/jgm/ws/**.class, ve/usb/jgm/ws/faults/**.class, ve/usb/jgm/ws/repo/**.class, ve/usb/jgm/util/**.class, **/*.hbm.xml"/>
+                     includes="ve/usb/jgm/repo/**/**.class, ve/usb/jgm/ws/**.class, ve/usb/jgm/ws/faults/**.class, ve/usb/jgm/ws/repo/**.class, ve/usb/jgm/ws/client/**.class, ve/usb/jgm/util/**.class, ve/usb/jgm/gui/**.class, ve/usb/jgm/client/**.class, **/*.hbm.xml"/>
+                <!--<fileset dir="${build}" includes="ve/usb/jgm/client/**/**.*"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/client/**/**.class"/>
+                 
+                <fileset dir="${build}" includes="ve/usb/jgm/util/**/**.class"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/tools/**/**.class"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/repo/**.class"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/ws/client/**.class"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/ws/**.class"/>
+                <fileset dir="${build}" includes="ve/usb/jgm/ws/faults/**.class"/>
+                <fileset dir="${build}" includes="org/**/**.class"/>
+                <fileset dir="${res}" includes="*.vm"/> -->
         </jar>
     </target>
 

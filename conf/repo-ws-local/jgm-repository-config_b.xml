@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Java Grid Machine - Repository Web Service configuration file
+ =========================================================
+ This file contains the configuration info needed to create and use
+ the Java Grid Machine Class Repository Web Service. 
+ 
+ The file is divided into two sectios, the first is the info regarding
+ the local repositories, and the second holds the info about neightbour
+ repository servlets who can handle requests that can't 
+ be satisfied with the local repo's. 
+ 
+ Each local repository item contained in the local repository configuration 
+ section ("repositories" tag) contains the FQN of the class implementing the  
+ ve.usb.jgm.repo.Repository interface, and the configuration data needed
+ by that class to initialize itself and be able to satisfy class bytecode
+ requests. The tag "repostory", nested inside the "repositories" tag, 
+ represents a local repository. The attributes for this tag includes the
+ FQN name of the implementation class for that repository, and the priority
+ number, wich indicates the order on wich the requests are fowarded to the
+ repositories. The lower the number, the sooner such repository will handle
+ the request.
+ 
+ The neightbour repositories sections contains the "contact info" of each
+ neightbour repository servlet, wich can be contacted in case that all the
+ local repositories are unable to satisfy a class bytecode request. Each
+ "neighbour" tag, representing a neightbour repository, contains it's location
+ The only info needed is the URL of that remote repository servlet, and a
+ priority number, wich dictates the order on with the neightbours are queried.
+ 
+ 
+-->
+
+<jgm-repository-config>
+    
+    <!-- The following is to use the RDBMS hibernate based backend (recommended) -->
+    <backend class="ve.usb.jgm.repo.backend.hibernate.HibernateBackend">
+        
+        <!-- This option is required for correct transactional table updates -->
+        <property name="hibernate.order_updates" value="true"/>
+    
+        <!-- sample properties for MySQL with InnoDB -->
+        <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLInnoDBDialect"/>
+        <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
+        <property name="hibernate.connection.url" value="jdbc:mysql://localhost/jadima"/>
+        <property name="hibernate.connection.username" value="jadima"/>
+        <property name="hibernate.connection.password" value="j4d1m4"/>
+        
+        
+        
+        <!-- The following uses C3P0 connection pool -->
+        <property name="hibernate.c3p0.min_size" value="5"/>
+        <property name="hibernate.c3p0.max_size" value="20"/>
+        <property name="hibernate.c3p0.timeout" value="1800"/>
+        <property name="hibernate.c3p0.max_statements" value="50"/>
+        
+        <!-- The following uses hibernate internal connection pool -->
+        <!-- <property name="hibernate.connection.pool_size" value=""/>-->
+        
+    </backend>
+
+    <!-- The following is to use the filesystem based backend (not for production!) -->
+    <!--<backend class="ve.usb.jgm.repo.backend.fs.FileSystemBackend">
+        <directory location="/home/jdeoliveira/jdm-fs-repository"/>
+    </backend>-->
+
+</jgm-repository-config>

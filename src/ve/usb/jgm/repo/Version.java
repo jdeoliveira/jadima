@@ -153,7 +153,6 @@ public class Version implements java.io.Serializable {
      * @return Value of property stubsJar.
      */
     public byte[] getJavadocZip() {
-
         return this.javadocZip;
     }
 

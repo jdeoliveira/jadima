@@ -5,7 +5,7 @@
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
 
   <appender name="RollingAppender" class="org.apache.log4j.RollingFileAppender">
-    <param name="File" value="/home/jdeoliveira/work/jgm/jgm/log/repo.log"/>
+    <param name="File" value="/tmp/repo.log"/>
     <param name="maxBackupIndex" value="10"/>
     <param name="maxFileSize" value="500KB"/>
     <layout class="org.apache.log4j.PatternLayout">
@@ -15,7 +15,7 @@
   </appender>
   
   <appender name="sql" class="org.apache.log4j.RollingFileAppender">
-    <param name="File" value="/home/jdeoliveira/work/jgm/jgm/log/sql-repo.log"/>
+    <param name="File" value="/tmp/sql-repo.log"/>
     <param name="maxBackupIndex" value="10"/>
     <param name="maxFileSize" value="500KB"/>
     <layout class="org.apache.log4j.PatternLayout">
@@ -34,7 +34,7 @@
   
   
   <logger name="ve.usb.jgm">
-    <level value="error" />
+    <level value="debug" />
     <!-- <appender-ref ref="RollingAppender"/> -->
     <appender-ref ref="ConsoleAppender"/>
   </logger>

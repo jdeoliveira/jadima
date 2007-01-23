@@ -19,12 +19,19 @@ import ve.usb.jgm.repo.backend.*;
 import ve.usb.jgm.repo.*;
 import ve.usb.jgm.ws.faults.*;
 import ve.usb.jgm.util.*;
+import ve.usb.jgm.gui.*;
+import ve.usb.jgm.client.*;
+import java.lang.reflect.*;
+
+//import java.awt.*;
+//import java.awt.event.*;
+//import javax.swing.*; 
 
 /**
  * Variables de entorno requeridas para el funcionamiento
  * 
  */
-public class RepositoryService {
+public class RepositoryService extends Thread{
 
     /**
      * Logger (log4j)
@@ -35,7 +42,18 @@ public class RepositoryService {
      * Almacen de datos de este repositorio
      */
     private ve.usb.jgm.repo.backend.Backend myBackend;
+       
+    /**
+     * Repositorios conocidos
+     */    
+    private static Collection<RepositoryClient> knownRepos;
     
+    /**
+     * Time for repositories
+     */
+    private static int time;
+    
+       
     /**
      * Creates a new instance of the Repository Web Service. This method is called 
      * once, especifically on the first service call made by a client. 
@@ -95,8 +113,23 @@ public class RepositoryService {
 
             //Arrancamos este backend
             myBackend.init();
-
+            
+            //// AGREGUE ESTO ///////
+            Element repositories = config.getElem("repositories");
+            
+            try {
                 
+                time = (new Integer(repositories.getAttr("time"))).intValue();
+
+            } catch (NumberFormatException e) {
+                logger.warn("invalid time attribute value. Check te configuration file");
+                
+            }
+            
+            knownRepos = ve.usb.jgm.gui.JdmRepository.knownRepositories(repositories); 
+                    
+            ////////////////////////
+            
         } catch (XMLLightException e) {
             logger.error("XML parsing error", e);
             //throw new RuntimeException("Errors parsing the repository  " +
@@ -115,7 +148,12 @@ public class RepositoryService {
             //"repository backend.  Check the log for the details. THE REPOSITORY SERVICET IS " +
             //"UNAVAILABLE.", e);
         }
-        logger.info("Jgm Repository WebService initialized sucessfully");
+        logger.info("Jgm Repository WebService initialized sucessfully kkkkkkkkkkkkkkkkkk");
+        
+        for (RepositoryClient r: knownRepos){
+                
+                logger.info(r.getName());
+            }
     }
     
     /**
@@ -131,10 +169,15 @@ public class RepositoryService {
      * @return Array of Bytecode objects with the requested classes found on this
      * repository, which the currently authenticated user is allowed to access
      */
-    public Bytecode[] getClasses(
-        Bytecode[] requests
-    ) 
-    throws RepositoryInternalErrorFault  {
+    
+    ClassFinder classFinder;
+    //javax.swing.Timer timer;
+    
+    public Bytecode[] getClasses( Bytecode[] requests) 
+        throws RepositoryInternalErrorFault  {
+        
+        //Vector nofoundClasses = new Vector();
+        Collection<Bytecode> nofoundClasses = new HashSet<Bytecode>();
         
         if (logger.isInfoEnabled())
             logger.info("Begin request for classes " + Arrays.deepToString(requests));
@@ -154,26 +197,99 @@ public class RepositoryService {
                 Bytecode bytecode = myBackend.getBytecode(r.getClassName(), r.getMajorVersion(), r.getMinorVersion());
 
                 if (isUserInRole(request, bytecode.getAllowedRoles())) {
+                    logger.info("Antes de agregar bytecode a response");
                     response.add(bytecode);
+                    logger.info("Despues de agregar bytecode a response");
                 } else {
                     logger.info("User not allowed to use this class");
                 }
                 
             } catch (LibraryNotFoundException e) {
                 logger.info("Library not found in backend");
+                nofoundClasses.add(r);
             } catch (VersionNotFoundException e) {
                 logger.info("Version not found in backend");
+                nofoundClasses.add(r);
             } catch (BytecodeNotFoundException e) {
                 logger.info("Class not found in backend");
+                nofoundClasses.add(r);
             } catch (BackendInternalErrorException e) {
                 logger.warn("Backend is broken", e);
                 throw new RepositoryInternalErrorFault("Backend is broken");
-            }
+            } 
         }
+        /*
+         * LLAMO AL METODO DE CONEXION
+         */
+        
+        //sustituir el metodo find clases por una clase hilo, terminarla despues de cierto tiempo y obtener la respuesta
+        
+        logger.info("AAAAAAAAQUIIIIIIIIIIIIIIIII"+ nofoundClasses.size());
+        
+        if (nofoundClasses.size() > 0){
+            logger.info("-------------> to find the class!!!!!");
+            //thread implementation
+            
+            classFinder = new ClassFinder();
+            
+            classFinder.startSearch(nofoundClasses, knownRepos);
+            
+            synchronized(classFinder){
+                 try{
+                    logger.info("-------------> im sleeping and waiting!!!!!");
+                    classFinder.wait(time);
+                    
+                 } catch(InterruptedException e){
 
+                }
+            }    
+            
+            logger.info("-------------> im awake!!!!!");
+            classFinder.stop = true;
+
+            Collection<Bytecode> resp = classFinder.resp;
+
+            if(resp != null){
+                logger.info("-------------> i got the answer!!!!!" + resp.size());
+
+                if (resp.size() > 0) {
+                    for (Bytecode r: resp){
+                        response.add(r);
+                    }
+                }
+            }
+            else{
+                logger.info("-------------> the answer is null :(...!!!!");
+            }         
+           
+            logger.info("-------------> finish search!!!!!");         
+        }
         //Convertimos la respuesta para enviarla al cliente en el formato adecuado
         return response.toArray(new Bytecode[0]);
     }
+    
+   
+    /*
+     * AQUI HAGO LA CONEXION CON LOS REPOSITORIOS CONOCIDOS
+     */       
+   /* public Collection<Bytecode> findClasses(Collection<Bytecode> classes){
+        
+        Collection<Bytecode> resp = null;
+        
+        for (RepositoryClient c: knownRepos){
+            
+            try {
+                resp = c.requestClasses(classes);
+                if (resp.size() == 0) {
+                    logger.debug("Not found, trying next repo");
+                }
+            } catch (Exception e) {
+                logger.warn("Exception communicating with repository, trying next", e);
+            }
+        }
+        
+        return resp;
+    }*/
     
     
     /**

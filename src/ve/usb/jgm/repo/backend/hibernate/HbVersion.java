@@ -192,7 +192,6 @@ public class HbVersion {
      * @return Value of property javadocZip.
      */
     public byte[] getJavadocZip() {
-
         return this.javadocZip;
     }
 

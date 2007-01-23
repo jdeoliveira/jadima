@@ -34,7 +34,7 @@
   
   
   <logger name="ve.usb.jgm">
-    <level value="debug" />
+    <level value="error" />
     <!-- <appender-ref ref="RollingAppender"/> -->
     <appender-ref ref="ConsoleAppender"/>
   </logger>
@@ -46,19 +46,19 @@
   </logger>
   
   <logger name="org.hibernate">
-    <level value="debug"/>
+    <level value="error"/>
     <!-- <appender-ref ref="RollingAppender"/> -->
     <appender-ref ref="ConsoleAppender"/>
   </logger>
   
   <logger name="org.hibernate.SQL">
-    <level value="debug"/>
+    <level value="error"/>
     <!-- <appender-ref ref="sql"/> -->
     <appender-ref ref="ConsoleAppender"/>
   </logger>
   
   <logger name="org.hibernate.tool.hbm2ddl">
-    <level value="debug"/>
+    <level value="error"/>
     <appender-ref ref="sql"/> 
     <!--<appender-ref ref="ConsoleAppender"/>-->
   </logger>
