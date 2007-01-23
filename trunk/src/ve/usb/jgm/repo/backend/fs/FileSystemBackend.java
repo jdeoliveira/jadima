@@ -205,7 +205,7 @@ public class FileSystemBackend implements ve.usb.jgm.repo.backend.Backend {
      */
     public Collection<Library> getAllLibraries() throws BackendInternalErrorException {
         try {
-            
+                        
             logger.debug("Requesting all libraries");
             
             HashSet<Library> result = new HashSet<Library>();

@@ -135,6 +135,8 @@ public class Query {
                 if (line.hasOption("r")) {
                     libs = RepositoryBroker.getAllLibraries(line.getOptionValue("r"));
                 } else {
+                    //se mete aqui RA
+                    System.out.println("-------------------> Query REAA");
                     libs = RepositoryBroker.getAllLibraries();
                 }
                 
@@ -162,8 +164,7 @@ public class Query {
             } else if (line.hasOption("j")) {
                 
                 
-                //quiere los javadocs
-                
+                //quiere los javadocs                
                 String[] verData = line.getOptionValues("j");
                 Version v = RepositoryBroker.getVersion(
                     verData[0], 

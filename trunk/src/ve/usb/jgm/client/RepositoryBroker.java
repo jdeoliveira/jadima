@@ -10,8 +10,8 @@ import ve.usb.jgm.repo.*;
 import java.util.*;
 import org.apache.log4j.*;
 import java.io.*;
-/**
- *
+import ve.usb.jgm.ws.*;
+ /*
  * @author  Jesus De Oliveira <A HREF="mailto:jesus@bsc.co.ve"><jesus@bsc.co.ve></A>
  */
 public class RepositoryBroker {
@@ -282,13 +282,18 @@ public class RepositoryBroker {
         
         Map<String, Library> bag = new HashMap<String, Library>();
         
+        
         for (RepositoryClient c: myRepos) {
 
             logger.debug("Requesting all libraries to " + c.getName());
+            RepositoryServiceServiceLocator l = new RepositoryServiceServiceLocator();
             
+            System.out.println(" ---------------> WS" + l.getJgmServiceAddress());
+            System.out.println(" ---------------> TS " + l.getServiceName().toString());            
             try {
-                Collection<Library> libs = getAllLibraries(c);
-                
+                System.out.println("-------------------> RepositoryBroker 1 REAA");
+        Collection<Library> libs = getAllLibraries(c);
+                System.out.println("-------------------> RepositoryBroker 3 REAA");     
                 //iteramos cada una a ver si ya esta agregada al bag
                 for (Library aLib: libs) {
                     logger.debug("Received library " + aLib.getName());
@@ -320,6 +325,7 @@ public class RepositoryBroker {
                         logger.debug("It's new, adding it to the bag");
                         aLib.setDescription(aLib.getDescription() + " (from " + c.getName() + ")");
                         bag.put(aLib.getName(), aLib);
+                        
                         
                         for (Version v: aLib.getVersions()) {
                             v.setDescription(v.getDescription() + " (from " + c.getName() + ")");
@@ -354,6 +360,8 @@ public class RepositoryBroker {
     throws 
         RepositoryClientCommunicationException
     {
+        //aqui viene RA
+        System.out.println("-------------------> RepositoryBroker 2 REAA");
         return c.getAllLibraries();
     }
     
@@ -364,6 +372,10 @@ public class RepositoryBroker {
     public static Library getLibrary(String libName) 
     throws LibraryNotFoundException
     {
+        
+        
+        RepositoryServiceServiceLocator l = new RepositoryServiceServiceLocator();
+        
         logger.info("Collecting all versions of " + libName + " on available repositories");
         
         Map<String, Version> bag = new HashMap<String, Version>();
