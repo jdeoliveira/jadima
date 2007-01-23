@@ -35,9 +35,15 @@ public class LocalityPrefetchAgent extends PrefetchAgent {
     //acumulado de tiempos de transferencia
     private long accumulatedTransferTime = 0;
     
+    //thereshold de prefetch (prefetching window size)
+    private long thereshold = 0;
+    
+    private ArrayList<String> alreadyLoadedClasses;
+    
     public LocalityPrefetchAgent() {
         oldProfile = new HashMap<Bytecode, Long>();
         newProfile = new HashMap<Bytecode, Long>();
+        alreadyLoadedClasses = new ArrayList<String>();
         currentTransactions = new HashMap<String, Long>();
     }
 
@@ -63,6 +69,19 @@ public class LocalityPrefetchAgent extends PrefetchAgent {
 
     public void configure(com.softcorporation.xmllight.Element el) throws PrefetchAgentConfigurationException {
         //nothing needs to be configurated
+
+        try {
+            logger.debug("Starting Locality Prefetch Agent");
+            thereshold = new Integer(el.getAttr("thereshold"));
+            logger.debug("Locality Prefetch Agent configured with a thereshold of " + thereshold + " msec");
+            
+        /*} catch (XMLLightException e) {
+            logger.warn("Errors parsing prefetch configuration data", e);
+            throw new RepositoryClientConfigurationException("Errors parsing prefetch configuration data", e);*/
+        } catch (NumberFormatException e) {
+            logger.warn("Errors parsing prefetch configuration data (supplied thereshold value is not an integer)", e);
+            throw new PrefetchAgentConfigurationException("Errors parsing prefetch configuration data (supplied thereshold value is not an integer)", e);
+        }
     }
 
     public void endTransaction(String className, int majorVersion, int minorVersion) {
@@ -96,12 +115,13 @@ public class LocalityPrefetchAgent extends PrefetchAgent {
         //TODO: por ahora no consideramos el numero de version, solo nos interesa el nombre
         //TODO: el thereshold esta cableado
         
-        int thereshold = 500;
+        //int thereshold = 500;
         
         HashSet<Bytecode> related = new HashSet<Bytecode>();
         
         logger.debug("Determing related classes to " + mainClass);
         
+        alreadyLoadedClasses.add(mainClass.getClassName());
         if (oldProfile.containsKey(mainClass)) {
         
             //vemos el tiempo de carga efectivo de la clase solicitada
@@ -118,15 +138,20 @@ public class LocalityPrefetchAgent extends PrefetchAgent {
                 logger.debug("comparing with " + current.getKey() + " loaded at " + current.getValue());
                 
                 if (!(current.getKey().getClassName().equals(mainClass.getClassName()))) {
-                    long difference = Math.abs(current.getValue() - effective);
-                
-                    logger.debug("difference: " + difference + ", thereshold " + thereshold);
-                
-                    if (difference <= thereshold) {
-                        logger.debug("Is in the cluster, adding it");
-                        related.add(current.getKey());
+                    if (alreadyLoadedClasses.contains(current.getKey().getClassName())) {
+                        logger.debug("Already loaded, not adding to related classes");
                     } else {
-                        logger.debug("Is not in the cluster");
+                        long difference = Math.abs(current.getValue() - effective);
+
+                        logger.debug("difference: " + difference + ", thereshold " + thereshold);
+
+                        if (difference <= thereshold) {
+                            logger.debug("Is in the cluster, adding it");
+                            related.add(current.getKey());
+                            alreadyLoadedClasses.add(current.getKey().getClassName());
+                        } else {
+                            logger.debug("Is not in the cluster");
+                        }
                     }
                 }
             }
