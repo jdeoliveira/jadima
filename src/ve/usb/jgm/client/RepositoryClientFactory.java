@@ -30,6 +30,8 @@ public class RepositoryClientFactory {
     
     static {
         try {
+            long before = System.currentTimeMillis();
+            
             configuredClients = new LinkedList<RepositoryClient>();
             
             Element elemRoot = XmlConfigurator.getConfigurationElement();
@@ -108,6 +110,9 @@ public class RepositoryClientFactory {
             configuredClients.notifyAll();
             }
             
+            long after = System.currentTimeMillis();
+            double timeTook = after - before;
+            logger.info("Ellapsed time discovering repos: " + timeTook);
         } catch (XMLLightException e) {
             logger.error("Errors parsing repositories configuration data", e);
             throw new RuntimeException("Errors parsing repositories configuration data", e);

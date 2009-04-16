@@ -73,6 +73,7 @@ public class EHCacheStubsCacheManager extends StubsCacheManager {
     
     public java.util.Collection<java.io.File> getStubs(java.util.Collection<ve.usb.jgm.repo.Version> versions) throws ve.usb.jgm.repo.VersionNotFoundException {
         try {
+            long before = System.currentTimeMillis();
             //este cache manager me crea los jars solicitados en archivos temporales
             
             Collection<Version> requestedVersions = new LinkedList<Version>(versions);
@@ -98,6 +99,7 @@ public class EHCacheStubsCacheManager extends StubsCacheManager {
             
             //pedirle cada repo todas las versiones que faltan (que no estan en el cache)
             if (requestedVersions.size() > 0) {
+                long before = System.currentTimeMillis();
                 for (RepositoryClient c: repos) {
                     logger.debug("trying " + c.getName());
                     try {
@@ -181,6 +183,9 @@ public class EHCacheStubsCacheManager extends StubsCacheManager {
                     try { fos.close(); } catch (Exception e) {}
                 }
             }
+            long after = System.currentTimeMillis();
+            double timeTook = after - before;
+            cacheLogger.info("Ellapsed time searching for stubs: " + timeTook);   
             
             return files;
         } catch (Throwable e) {
